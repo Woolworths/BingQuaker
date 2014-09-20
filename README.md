@@ -1,4 +1,5 @@
-Google-Scraper
+GoogleQuaker
+
 ==============
 
 Scrapes Google Search Data
