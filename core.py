@@ -1,6 +1,6 @@
 #python3.3 works for Bing then I'll make it google when I can be fucked!
 # __search__() does all the work
-#the main search has not been implemented yet, resultCount and getUrls works fine though
+#the main search has not been implemented yet, resultCount() and getUrls() works fine though
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from django.utils.encoding import smart_str
