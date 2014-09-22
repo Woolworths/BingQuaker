@@ -1,5 +1,6 @@
-#python3.3 bing the I'll make it google when i can be fucked!
+#python3.3 works for Bing then I'll make it google when I can be fucked!
 # __search__() does all the work
+#the main search has not been implemented yet, resultCount and getUrls works fine though
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from django.utils.encoding import smart_str
@@ -17,7 +18,7 @@ class Core(object):
         results = []
         html = self.html
         if(resultType == 'search'):
-            pass
+            pass#working on it
         elif(resultType == 'resultCount'):
             sbCount = html.find('span', attrs={'class': 'sb_count'})
             sbCount = sbCount.get_text()[:-8]
@@ -46,9 +47,10 @@ class Core(object):
             print("full_url= %s" % (str(self.full_url)))
 
 def main():
-    letssee = Core('google', numResults=5, displayResults=True)
-    #letssee.displayInfo(debug=True)
-    letssee.resultCount()
-    letssee.getUrls()
+    app = Core('google', numResults=5, displayResults=True)
+    #app.search() DOES NOT WORK YET :D
+    app.displayInfo(debug=True)
+    app.resultCount()
+    app.getUrls()
 if __name__ == "__main__":
     main()
