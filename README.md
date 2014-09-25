@@ -1,5 +1,4 @@
 BingQuaker - Library
-
 ==============
 
 Scrapes Bing Search Data
