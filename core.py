@@ -1,24 +1,55 @@
 #python3.3 works for Bing then I'll make it google when I can be fucked
 #the main search has not been implemented yet, resultCount() and getUrls() works fine though
 #MADE FOR EDUCATION PURPOSES, DO NOT USE!
-from urllib.request import urlopen
-from urllib.parse import urlencode
+from urllib.request import urlopen, Request
+from urllib.parse import urlencode, quote_plus
 from bs4 import BeautifulSoup
 from django.utils.encoding import smart_str
+from pprint import pprint
+import random
+
+browsers = ['Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.3) Gecko/20090913 Firefox/3.5.3',
+           'Mozilla/5.0 (Windows; U; Windows NT 6.1; en; rv:1.9.1.3) Gecko/20090824 Firefox/3.5.3 (.NET CLR 3.5.30729)',
+           'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US; rv:1.9.1.3) Gecko/20090824 Firefox/3.5.3 (.NET CLR 3.5.30729)',
+           'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.1) Gecko/20090718 Firefox/3.5.1',
+           'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/532.1 (KHTML, like Gecko) Chrome/4.0.219.6 Safari/532.1',
+           'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; InfoPath.2)',
+           'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; SLCC1; .NET CLR 2.0.50727; .NET CLR 1.1.4322; .NET CLR 3.5.30729; .NET CLR 3.0.30729)',
+           'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.2; Win64; x64; Trident/4.0)',
+           'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; SV1; .NET CLR 2.0.50727; InfoPath.2)',
+           'Mozilla/5.0 (Windows; U; MSIE 7.0; Windows NT 6.0; en-US)',
+           'Mozilla/4.0 (compatible; MSIE 6.1; Windows XP)',
+           'Opera/9.80 (Windows NT 5.2; U; ru) Presto/2.5.22 Version/10.51']
+referer = ['http://www.google.com/?q=',
+           'http://www.usatoday.com/search/results?q=',
+           'http://engadget.search.aol.com/search?q=',
+           'https://www.bing.com']
 
 class Core(object):
     #NOTE, this is not using the API therefore the max results you can get it 10
-    def __init__(self, q, numResults=10, displayResults=True):
-        self.q = smart_str(q)
+    def __init__(self, q, numResults=10):
+        self.q = q
+        self.url = "https://www.bing.com"
         self.numResults = int(numResults)
-        self.displayResults = bool(displayResults)
         # here is where we open url and make it into a bs4 object
-        self.encode = urlencode({'q' : self.q})
-        self.full_url = "http://www.bing.com/search?%s" % (self.encode)
-        self.url = urlopen(self.full_url)
-        self.html = BeautifulSoup(self.url)
-    def __search__(self, resultType='search'):
+        
+        self.query = quote_plus(self.q)
+        self.fullUrl = "https://www.bing.com/search?q=%s" % (self.query)
+
+        req = Request(self.fullUrl)        
+        req.add_header('User-Agent', random.choice(browsers))
+        req.add_header('Accept-Language', 'en-US,en;q=0.5')
+        req.add_header('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.7')
+        req.add_header('Cache-Control', 'no-cache')
+        req.add_header('Referer', random.choice(referer))
+
+        resp = urlopen(req)
+        html = resp.read()
+        self.html = BeautifulSoup(html)
+        
+    def __search__(self, resultType='search', numResults=10, displayResults=True):
         results = []
+        displayResults = bool(displayResults)
         html = self.html
         if(resultType == 'search'):
             for res in html.ol.find_all('li', attrs={'class': 'b_algo'}):
@@ -31,33 +62,41 @@ class Core(object):
             sbCount = sbCount.get_text()[:-8]
             results.append(smart_str(sbCount))
         elif(resultType == 'getUrls'):
-            for url in html.ol.find_all('cite'):
+            for url in html.find_all('li', attrs={'class': 'b_algo'}):
+                url = url.find('div', attrs={'class': 'b_attribution'})
+                url = url.find('cite')
                 cleanUrl = url.get_text()
                 results.append(smart_str(cleanUrl))
         #trim list
-        if(resultType == 'search' or resultType == 'getUrls'): del results[self.numResults:]
+        if(resultType == 'search' or resultType == 'getUrls' or resultType == 'headline'): del results[numResults:]
         
-        if(self.displayResults==True): print(results)
-        elif(self.displayResults==False): return(results)        
-    def search(self):
-        self.__search__(resultType='search')
-    def resultCount(self):
-        self.__search__(resultType='resultCount')
-    def getUrls(self):
-        self.__search__(resultType='getUrls')
+        if(displayResults==True): print(results)
+        elif(displayResults==False): return(results)
+        
+    def headline(self, numResults=10, displayResults=True):
+        pass
+    def search(self, numResults=10, displayResults=True):
+        self.__search__(resultType='search', numResults=numResults, displayResults=displayResults)
+    def resultCount(self, numResults=10, displayResults=True):
+        self.__search__(resultType='resultCount', numResults=numResults, displayResults=displayResults)
+    def getUrls(self, numResults=10, displayResults=True):
+        self.__search__(resultType='getUrls', numResults=numResults, displayResults=displayResults)
 
     def displayInfo(self, debug=False):
-        print("q= %s" % (str(self.q)))
+        print("q= %s" % (str(self.query)))
         print("numResults= %s" % (str(self.numResults)))
         if(debug==True):
             print("full_url= %s" % (str(self.full_url)))
 
-def main():
-    #remember you can only fetch 10 results (line 9)
-    app = Core('SEARCH-TERM-IN-HERE', numResults=10, displayResults=True)
-    app.search()
-    #app.displayInfo(debug=True)
-    #app.resultCount()
-    app.getUrls()
+def usage():
+    print('USAGE (default parameters - displayResults=True AND numResults=10):')
+    print('from BingQuaker import Core')
+    print("app = Core('QUERY') - numResults and displayResults are optional")
+    print('app.resultCount(displayResults=True) - Prints how many results the query returns')
+    print('app.headline(displayResults=False, numResults=3) - Returns the top 3 headlines')
+    print('app.search(displayResults=False, numResults=6) - Returns the top 6 main information (unless you set displayResults to False)')
+    print('app.getUrls(displayResults=True, numResults=2) - Prints the top 2 urls from the page')
+    print('app.displayInfo(debug=False) - Displays information about things (meant for debugging)')
+
 if __name__ == "__main__":
-    main()
+    usage()

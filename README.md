@@ -1,8 +1,8 @@
-BingQuaker
+BingQuaker - Library
 
 ==============
 
 Scrapes Bing Search Data
 
-I might make this a library (one day).
-I will also make a Google version when I can be fucked.
+Avoids Bing ads, choose the number of results you want, choose whether to print them or return them.
+If you find this helpful please star!
