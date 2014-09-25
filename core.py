@@ -1,6 +1,5 @@
-#python3.3 works for Bing then I'll make it google when I can be fucked
-#the main search has not been implemented yet, resultCount() and getUrls() works fine though
-#MADE FOR EDUCATION PURPOSES, DO NOT USE!
+# MADE ONLY FOR EDUCATIONAL PURPOSES, DO NOT USE AS SCRAPING DATA MAY BE ILLEGAL!
+# The program works fine however headline() is still being implemeted.
 from urllib.request import urlopen, Request
 from urllib.parse import urlencode, quote_plus
 from bs4 import BeautifulSoup
