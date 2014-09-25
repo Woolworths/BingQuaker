@@ -20,19 +20,17 @@ browsers = ['Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.3) Gecko/2009091
            'Mozilla/5.0 (Windows; U; MSIE 7.0; Windows NT 6.0; en-US)',
            'Mozilla/4.0 (compatible; MSIE 6.1; Windows XP)',
            'Opera/9.80 (Windows NT 5.2; U; ru) Presto/2.5.22 Version/10.51']
-referer = ['http://www.google.com/?q=',
+referrer = ['http://www.google.com/?q=',
            'http://www.usatoday.com/search/results?q=',
            'http://engadget.search.aol.com/search?q=',
            'https://www.bing.com']
 
-class Core(object):
+class Search(object):
     #NOTE, this is not using the API therefore the max results you can get it 10
-    def __init__(self, q, numResults=10):
+    def __init__(self, q):
         self.q = q
         self.url = "https://www.bing.com"
-        self.numResults = int(numResults)
         # here is where we open url and make it into a bs4 object
-        
         self.query = quote_plus(self.q)
         self.fullUrl = "https://www.bing.com/search?q=%s" % (self.query)
 
@@ -41,18 +39,20 @@ class Core(object):
         req.add_header('Accept-Language', 'en-US,en;q=0.5')
         req.add_header('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.7')
         req.add_header('Cache-Control', 'no-cache')
-        req.add_header('Referer', random.choice(referer))
+        req.add_header('Referer', random.choice(referrer))
 
         resp = urlopen(req)
         html = resp.read()
         self.html = BeautifulSoup(html)
         
-    def __search__(self, resultType='search', numResults=10, displayResults=True):
+    def __search__(self, resultType='search', *args, **kwargs):
         results = []
-        displayResults = bool(displayResults)
+        displayResults = kwargs.get('displayResults')
+        numResults = kwargs.get('numResults')
+        
         html = self.html
         if(resultType == 'search'):
-            for res in html.ol.find_all('li', attrs={'class': 'b_algo'}):
+            for res in html.find_all('li', attrs={'class': 'b_algo'}):
                 res = res.find('div', attrs={'class': 'b_caption'})
                 res = res.find('p')
                 text = res.get_text()
@@ -82,21 +82,22 @@ class Core(object):
     def getUrls(self, numResults=10, displayResults=True):
         self.__search__(resultType='getUrls', numResults=numResults, displayResults=displayResults)
 
-    def displayInfo(self, debug=False):
-        print("q= %s" % (str(self.query)))
-        print("numResults= %s" % (str(self.numResults)))
-        if(debug==True):
-            print("full_url= %s" % (str(self.full_url)))
+    def debug(self):
+        print('q= "%s"' % (str(self.q)))
+        print('full_url= "%s"' % (str(self.fullUrl)))
 
 def usage():
-    print('USAGE (default parameters - displayResults=True AND numResults=10):')
-    print('from BingQuaker import Core')
-    print("app = Core('QUERY') - numResults and displayResults are optional")
+    print('USAGE:')
+    print('from BingQuaker.core import Search')
+    print("app = Search('QUERY') - numResults and displayResults are optional")
     print('app.resultCount(displayResults=True) - Prints how many results the query returns')
     print('app.headline(displayResults=False, numResults=3) - Returns the top 3 headlines')
     print('app.search(displayResults=False, numResults=6) - Returns the top 6 main information (unless you set displayResults to False)')
     print('app.getUrls(displayResults=True, numResults=2) - Prints the top 2 urls from the page')
-    print('app.displayInfo(debug=False) - Displays information about things (meant for debugging)')
+    print('app.debug() - Displays information about things (meant for debugging)')
+    print('SEE TESTS.PY FOR MORE!')
+    print('SEE TESTS.PY FOR MORE!')
+    print('SEE TESTS.PY FOR MORE!')
 
 if __name__ == "__main__":
     usage()
