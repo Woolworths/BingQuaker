@@ -4,8 +4,7 @@ from urllib.request import urlopen, Request
 from urllib.parse import urlencode, quote_plus
 from bs4 import BeautifulSoup
 from django.utils.encoding import smart_str
-from pprint import pprint
-import random
+import threading, random
 
 browsers = ['Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.3) Gecko/20090913 Firefox/3.5.3',
            'Mozilla/5.0 (Windows; U; Windows NT 6.1; en; rv:1.9.1.3) Gecko/20090824 Firefox/3.5.3 (.NET CLR 3.5.30729)',
@@ -24,7 +23,7 @@ referrer = ['http://www.google.com/?q=',
            'http://engadget.search.aol.com/search?q=',
            'https://www.bing.com']
 
-class Search(object):
+class Search(threading.Thread):
     #NOTE, this is not using the API therefore the max results you can get it 10
     def __init__(self, q):
         self.q = q
@@ -71,13 +70,15 @@ class Search(object):
         
         if(displayResults==True): print(results)
         elif(displayResults==False): return(results)
-        
+
+    def resultCount(self, displayResults=True):
+        self.__search__(resultType='resultCount', displayResults=displayResults)    
+    def autocorrect(self, displayResults=True):
+        pass    
     def headline(self, numResults=10, displayResults=True):
         pass
     def search(self, numResults=10, displayResults=True):
         self.__search__(resultType='search', numResults=numResults, displayResults=displayResults)
-    def resultCount(self, numResults=10, displayResults=True):
-        self.__search__(resultType='resultCount', numResults=numResults, displayResults=displayResults)
     def getUrls(self, numResults=10, displayResults=True):
         self.__search__(resultType='getUrls', numResults=numResults, displayResults=displayResults)
 
@@ -90,6 +91,7 @@ def usage():
     print('from BingQuaker.core import Search')
     print("app = Search('QUERY') - numResults and displayResults are optional")
     print('app.resultCount(displayResults=True) - Prints how many results the query returns')
+    print('app.autocorrect(displayResults=False) - If the word is spelt wrong, returns the correct suggestion')
     print('app.headline(displayResults=False, numResults=3) - Returns the top 3 headlines')
     print('app.search(displayResults=False, numResults=6) - Returns the top 6 main information (unless you set displayResults to False)')
     print('app.getUrls(displayResults=True, numResults=2) - Prints the top 2 urls from the page')
