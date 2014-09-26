@@ -2,7 +2,7 @@ from core import Search
 '''
 from the file 'core.py', import the class 'Core'
 for you it would be:
-from BingQuaker.core import Core
+from BingQuaker.core import Search
 '''
 app = Search('Hello Kitty')
 app.resultCount(displayResults=True)
