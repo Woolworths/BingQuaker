@@ -1,5 +1,6 @@
 # MADE ONLY FOR EDUCATIONAL PURPOSES, DO NOT USE AS SCRAPING DATA MAY BE ILLEGAL!
 # The program works fine however headline() is still being implemeted.
+# make it so it can grab more than 10 request by going to page 2
 from urllib.request import urlopen, Request
 from urllib.parse import urlencode, quote_plus
 from bs4 import BeautifulSoup
