@@ -22,10 +22,10 @@ browsers = ['Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.3) Gecko/2009091
 referrer = ['http://www.google.com/?q=',
            'http://www.usatoday.com/search/results?q=',
            'http://engadget.search.aol.com/search?q=',
-           'https://www.bing.com']
+           'https://www.bing.com/search?q=']
 
 class Search(threading.Thread):
-    #NOTE, this is not using the API therefore the max results you can get it 10
+    #NOTE, this is not using the API therefore the max results you can get it 10 - change this!
     def __init__(self, q):
         self.q = q
         self.url = "https://www.bing.com"
@@ -66,6 +66,18 @@ class Search(threading.Thread):
                 url = url.find('cite')
                 cleanUrl = url.get_text()
                 results.append(smart_str(cleanUrl))
+        elif(resultType == 'autocorrect'):
+            try:
+                ac = html.find('div', attrs={'id': 'sp_requery'})
+                ac = ac.find('a')
+                cleanAc = ac.get_text()
+                results.append(smart_str(cleanAc))
+            except Exception: results.append(False)
+        elif(resultType == 'headline'):
+            for headline in html.find_all('li', attrs={'class': 'b_algo'}):
+                headline = headline.find('h2').find('a')
+                cleanHeadline = headline.get_text()
+                results.append(smart_str(cleanHeadline))
         #trim list
         if(resultType == 'search' or resultType == 'getUrls' or resultType == 'headline'): del results[numResults:]
         
@@ -75,9 +87,9 @@ class Search(threading.Thread):
     def resultCount(self, displayResults=True):
         self.__search__(resultType='resultCount', displayResults=displayResults)    
     def autocorrect(self, displayResults=True):
-        pass    
+        self.__search__(resultType='autocorrect', displayResults=displayResults)
     def headline(self, numResults=10, displayResults=True):
-        pass
+        self.__search__(resultType='headline', numResults=numResults, displayResults=displayResults)
     def search(self, numResults=10, displayResults=True):
         self.__search__(resultType='search', numResults=numResults, displayResults=displayResults)
     def getUrls(self, numResults=10, displayResults=True):
